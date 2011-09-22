@@ -105,7 +105,7 @@ class OpenIdMixin(object):
             "openid.identity":
                 "http://specs.openid.net/auth/2.0/identifier_select",
             "openid.return_to": url,
-            "openid.realm": self._openid_arg_realm(callback_uri),
+            "openid.realm": urlparse.urljoin(url, '/'),
             "openid.mode": "checkid_setup",
         }
         if ax_attrs:
@@ -143,13 +143,6 @@ class OpenIdMixin(object):
                 "openid.oauth.scope": oauth_scope,
             })
         return args
-
-    def _openid_arg_realm(self, callback_uri):
-        if callback_uri:
-            parsed = urlparse.urlparse(callback_uri)
-            if parsed.netloc != '':
-                return parsed.scheme + "://" + parsed.netloc + "/"
-        return self.request.protocol + "://" + self.request.host + "/",
 
     def _on_authentication_verified(self, callback, response):
         if response.error or b("is_valid:true") not in response.body:
