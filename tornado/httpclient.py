@@ -15,6 +15,28 @@ from tornado.escape import utf8
 from google.appengine.api import urlfetch
 
 
+class HTTPClient(object):
+    """An blocking HTTP client that uses `google.appengine.api.urlfetch`."""
+    def fetch(self, request, callback, **kwargs):
+        if not isinstance(request, HTTPRequest):
+            request = HTTPRequest(url=request, **kwargs)
+
+        url = request.url
+        kwargs = {
+            'payload': request.body,
+            'method': request.method,
+            'headers': request.headers,
+            'allow_truncated': False,
+            'follow_redirects': request.follow_redirects,
+            'validate_certificate': request.validate_cert
+            }
+
+        rpc = urlfetch.create_rpc()
+        rpc.callback = create_rpc_callback(rpc, callback, request=request)
+        urlfetch.make_fetch_call(rpc, url, **kwargs)
+        rpc.wait()
+
+
 class AsyncHTTPClient(object):
     _rpcs = []
     
