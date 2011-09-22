@@ -1032,8 +1032,8 @@ def asynchronous(method):
     """
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
-        #if self.application._wsgi:
-        #    raise Exception("@asynchronous is not supported for WSGI apps")
+        if self.application._wsgi:
+            raise Exception("@asynchronous is not supported for WSGI apps")
         self._auto_finish = False
         with stack_context.ExceptionStackContext(
             self._stack_context_handle_exception):
